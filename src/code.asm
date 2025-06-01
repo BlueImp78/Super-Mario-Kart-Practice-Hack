@@ -1,8 +1,5 @@
 include
 
-;TODO:
-;	- Hide counter at appropriate times
-
 
 write_speed_oam:
 if !version == 1
@@ -24,11 +21,11 @@ endif
 	LSR
 	ASL
 	TAY
-	LDX #!oam_mirror+$1C0
-	LDA #$45D6
+	LDX #!oam_mirror+$1A0
+	LDA #$45D4
 	STA $00,x 
 	JSR .write_properties  		;Write first digit
-	LDA #$45E0
+	LDA #$45DE
 	STA $00,x 
 	LDA !temp_1FD0			;Retrieve converted speed value
 	AND #$0F00
@@ -44,14 +41,14 @@ endif
 	LSR
 	ASL
 	TAY
-	LDA #$45EA
+	LDA #$45E8
 	STA $00,x
 	JSR .write_properties  		;Write third digit
 	LDA !temp_1FD0
 	AND #$000F
 	ASL
 	TAY
-	LDA #$45F4
+	LDA #$45F2
 	STA $00,x
 	JSR .write_properties  		;Write fourth digit
 
@@ -62,8 +59,13 @@ endif
 	LDA #$38A7
 -:
 	STA $02,x
-	LDA #$3CE4
+	LDA #$3CE2
 	STA $00,x
+	LDA !game_mode
+	CMP #$0004  			;Check if we're in time trial mode
+	BNE .return  			;If not, return
+	JSR handle_inputs_oam
+.return:
 	PLP
 	RTL
 
@@ -98,7 +100,7 @@ endif
 	dw $38BB			;9
 
 
-color_thing:
+color_code_speed_disp:
 	LDA $000036
 	CMP #$0002			;Check if we're in a race
 	BNE .return
@@ -112,7 +114,7 @@ color_thing:
 	LDA.l .top_speeds,x
 	CMP !player_kart_speed
 	BCC .check_top_2
-	LDA #$7FFF
+	LDA #$FFFF
 	BRA .write
 
 .check_top_2:
@@ -305,7 +307,7 @@ endif
 	dw $381F			;V
 	dw $3801			;1
 	dw $3825			;.
-	dw $3800			;0
+	dw $3801			;1
 	dw $0000
 	dw $380B			;B
 	dw $3822			;Y
@@ -318,3 +320,219 @@ endif
 	dw $3816			;M
 	dw $3819			;P
 	dw $FFFF
+
+
+
+upload_input_display:
+	LDA !game_mode
+	CMP #$0004  			;Check if we're in time trial mode
+	BNE .return  			;If not, return
+if !version == 1
+	LDX #$BF21  			;Hijacked instruction
+	JSL $81950D			;Hijacked instruction
+else
+	LDX #$C085  			;Hijacked instruction
+	JSL $8194F4			;Hijacked instruction
+endif
+	LDA #$5EE0
+	STA !VRAM_ADDR
+	LDX #$0020
+	LDY #$0000
+.write_top_half:
+	PHB
+	PHK 
+	PLB
+	LDA input_display_gfx,y
+	PLB
+	STA !VRAM_WRITE
+	INY
+	INY
+	DEX
+	BNE .write_top_half
+	LDA #$5FE0
+	STA !VRAM_ADDR
+	LDX #$0020
+	LDY #$0000
+.write_bottom_half:
+	PHB
+	PHK 
+	PLB
+	LDA input_display_gfx+$40,y
+	PLB
+	STA !VRAM_WRITE
+	INY
+	INY
+	DEX
+	BNE .write_bottom_half
+.return:
+	RTL
+
+
+handle_inputs_oam:
+	LDY #$0000
+	LDX #$0000
+.write_positions:
+	PHB
+	PHK 
+	PLB
+	LDA inputs_oam_positions,y
+	PLB
+	STA !oam_mirror+$1C0,x
+	INX
+	INX
+	INX
+	INX
+	INY
+	INY
+	CPY #$0014
+	BCC .write_positions
+	LDY #$0000
+	LDX #$0000
+.write_properties:
+	PHB
+	PHK 
+	PLB
+	LDA inputs_oam_properties,y
+	PLB
+	PHA
+	PHX
+	TYA
+	TAX
+	LDA !player_input_held
+	JSR (handle_inputs,x)
+	PLX
+	PLA
+	BCC +
+	EOR #$0A00
++:
+	STA !oam_mirror+$1C2,x
+	INX
+	INX
+	INX
+	INX
+	INY
+	INY
+	CPY #$0014
+	BCC .write_properties
+	RTS
+
+
+handle_inputs:
+	dw .up
+	dw .down
+	dw .left
+	dw .right
+	dw .a
+	dw .b
+	dw .x
+	dw .y
+	dw .l
+	dw .r
+
+
+.up:
+	BIT #$0800
+	BNE .pressed
+	CLC
+	RTS
+
+
+.down:
+	BIT #$0400
+	BNE .pressed
+	CLC
+	RTS
+
+
+.left:
+	BIT #$0200
+	BNE .pressed
+	CLC
+	RTS
+
+
+.right:
+	BIT #$0100
+	BNE .pressed
+	CLC
+	RTS
+
+
+.a:
+	BIT #$0080
+	BNE .pressed
+	CLC
+	RTS
+
+
+.b:
+	BIT #$8000
+	BNE .pressed
+	CLC
+	RTS
+
+
+.x:
+	BIT #$0040
+	BNE .pressed
+	CLC
+	RTS
+
+
+.y:
+	BIT #$4000
+	BNE .pressed
+	CLC
+	RTS
+
+
+.l:
+	BIT #$0020
+	BNE .pressed
+	CLC
+	RTS
+
+
+.r:
+	BIT #$0010
+	BNE .pressed
+	CLC
+	RTS
+
+
+
+.pressed:
+	SEC
+	RTS
+
+
+
+
+
+inputs_oam_positions:
+	dw $54D6			;Up
+	dw $5ED6			;Down
+	dw $59D0			;Left
+	dw $59DC			;Right
+
+	dw $59F3			;A
+	dw $5EEE			;B
+	dw $54EE			;X
+	dw $59E9			;Y
+
+	dw $4CD6			;L
+	dw $4CEE			;R
+
+inputs_oam_properties:
+	dw $39EE			;Up
+	dw $B9EE			;Down
+	dw $79EF			;Left
+	dw $A9EF			;Right
+
+	dw $39FF			;A
+	dw $39FF			;B
+	dw $39FF			;X
+	dw $39FF			;Y
+
+	dw $B9FE			;L
+	dw $B9FE			;R

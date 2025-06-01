@@ -12,6 +12,9 @@ org $008000
 
 org freerom
 	incsrc "code.asm"
+	
+input_display_gfx:
+	incbin "data/input_display_gfx.bin"
 
 
 warnpc freerom|$FFFF

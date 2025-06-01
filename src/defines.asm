@@ -4,14 +4,18 @@ freerom = $C80000 		;Expanded area
 
 ;registers
 !VRAM_ADDR = $2116
+!VRAM_WRITE = $2118
 !CGRAM_ADDR = $2121
 !CGRAM_WRITE = $2122
 
 
 ;RAM
+!game_mode = $2C
+
 !oam_mirror = $0200
 
 !player_character = $1012
+!player_input_held = $10C4
 !player_kart_boost = $10CA
 !player_kart_speed = $10EA
 

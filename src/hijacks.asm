@@ -5,16 +5,18 @@ include
 
 if !version == 1
 	hijack_NMI = $808011
-	hijack_title_screen_something = $808547
+	hijack_title_screen_timer = $808547
 	hijack_timer_update = $80A07C
+	hijack_course_select_dma = $81BEB5
 	hijack_special_course_check_1 = $81C63C
 	hijack_special_course_check_2 = $84F9BB
 	hijack_special_course_check_3 = $84FA23
 	hijack_special_course_check_4 = $84F5E8
 else
 	hijack_NMI = $808011
-	hijack_title_screen_something = $808547
+	hijack_title_screen_timer = $808547
 	hijack_timer_update = $80A071
+	hijack_course_select_dma = $81C019
 	hijack_special_course_check_1 = $81C7A0
 	hijack_special_course_check_2 = $84FAA2
 	hijack_special_course_check_3 = $84FB0A
@@ -25,12 +27,16 @@ endif
 
 
 org hijack_NMI
-	JSL color_thing
+	JSL color_code_speed_disp
 	NOP
 
-org hijack_title_screen_something
+org hijack_title_screen_timer
 	JSL upload_ego_text
 	WDM
+
+org hijack_course_select_dma
+	JSL upload_input_display
+	NOP #3
 
 
 org hijack_timer_update
