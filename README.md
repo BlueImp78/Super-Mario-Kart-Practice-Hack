@@ -10,6 +10,7 @@ A practice romhack for Super Mario Kart (NTSC and PAL)
 ## Features
 
 - Support for both NTSC (US) and PAL versions.
+- In-game Input Display (Time Trial mode only)
 - Special cup is unlocked by default in both Mario Kart GP (100cc) and Time Trial modes.
 - Onscreen, color coded speedometer: Displays your current speed and changes color based on it. White for when below top speed, Green for at top speed, Orange for above top speed. The top speed values take the character you're using into account. **NOTE: This feature was made with Time Trial and 100cc in mind (1 Player). While the speedometer can work in other modes/cc's, it may not be accurate.**
 - Boost indicator:  The number above the speedometer will change to a 1 if you have a stored boost value of 128 or above.
