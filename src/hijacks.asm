@@ -6,7 +6,7 @@ include
 if !version == 1
 	hijack_NMI = $808011
 	hijack_title_screen_timer = $808547
-	hijack_timer_update = $80A07C
+	hijack_thing_1 = $808092 ;$80A07C
 	hijack_course_select_dma = $81BEB5
 	hijack_special_course_check_1 = $81C63C
 	hijack_special_course_check_2 = $84F9BB
@@ -15,7 +15,7 @@ if !version == 1
 else
 	hijack_NMI = $808011
 	hijack_title_screen_timer = $808547
-	hijack_timer_update = $80A071
+	hijack_thing_1 = $808092 ;$80A071
 	hijack_course_select_dma = $81C019
 	hijack_special_course_check_1 = $81C7A0
 	hijack_special_course_check_2 = $84FAA2
@@ -39,9 +39,9 @@ org hijack_course_select_dma
 	NOP #3
 
 
-org hijack_timer_update
+org hijack_thing_1
 	JSL write_speed_oam
-	WDM
+	;WDM
 
 
 ;Enable special course always in time trial

@@ -2,13 +2,17 @@ include
 
 
 write_speed_oam:
-if !version == 1
-	ADC #$0166			;Hijacked instruction
-else
-	ADC #$0199			;Hijacked instruction
-endif
-	STA $0100			;Hijacked instruction
+;if !version == 1
+;	ADC #$0199			;Hijacked instruction
+;else
+;	ADC #$0166			;Hijacked instruction
+;endif
+;	STA $0100			;Hijacked instruction
+	JSL $84D56F
 	PHP
+	LDA $36
+	CMP #$0002			;Check if we're in a race
+	BNE .return 
 	LDA !player_kart_speed
 	STA !temp_1FD3
 	JSR hex_word_to_decimal
@@ -307,7 +311,7 @@ endif
 	dw $381F			;V
 	dw $3801			;1
 	dw $3825			;.
-	dw $3801			;1
+	dw $3802			;2
 	dw $0000
 	dw $380B			;B
 	dw $3822			;Y
